@@ -1,0 +1,58 @@
+---
+title: ''
+author: "Rafael"
+date: "2024-02-15"
+output: pdf_document
+---
+
+```{r}
+for (i in 0:4999){
+  file_name <- paste("particle_data_iteration_", i, ".txt", sep="")
+  print(file_name)
+  assign(paste("disk_", i, sep=""), read.table(file_name, quote = "\"", comment.char = ""))
+}
+
+```
+```{r}
+# Install and load the 'magick' package if you haven't already
+# install.packages("magick")
+library(magick)
+
+# Create an empty image list to store frames
+frames <- image_graph(width = 800, height = 800, res = 96)
+
+# Loop through each sphere object and create plots
+# Loop through each sphere object and create plots
+for (i in 0:4999){
+  disk_i <- get(paste("disk_", i, sep=""))  # Retrieve the object
+  
+  # Create a temporary file to save the plot
+  temp_file <- tempfile(fileext = ".png")
+  
+  # Plot and save the current plot to the temporary file
+  png(temp_file, width = 800, height = 800, res = 96)
+  plot(disk_i$V1, disk_i$V2, main = paste("Disk iteration::", i), asp = 1, col="purple", pch=20, bg="purple", cex=0.7)
+  dev.off()
+  
+  # Read the saved plot into the frame
+  frame <- image_read(temp_file)
+  
+  # Add a white border to the frame
+  frame <- image_border(frame, "white", 10)
+  
+  # Append the current plot to the image list
+  frames <- c(frames, frame)
+  print(i)
+}
+
+# Save the GIF file
+gif_file <- "disk_plots.gif"
+image_write(frames, gif_file, format = "gif")
+```
+
+```{r}
+par(mfrow = c(1, 2))
+plot(disk_0$V1, disk_0$V2, main = paste("Disk iteration::0"), asp = 1, col="purple", pch=20, bg="purple", cex=0.7)
+plot(disk_4999$V1, disk_4999$V2, main = paste("Disk iteration::4999"), asp = 1, col="darkblue", pch=20, bg="darkblue", cex=0.7)
+
+```
